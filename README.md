@@ -9,7 +9,7 @@
 
 ## Visão Geral da Arquitetura
 
-![Diagrama](./diagram.svg)
+![Diagrama](./img/diagram.svg)
 
 - **Comunicação Cliente-Nó (gRPC)**: Clientes interagem com qualquer nó no cluster usando gRPC para realizar operações de Put (escrita) e Get (leitura).
 - **Comunicação Nó-Nó (MQTT)**: Os nós usam um broker MQTT para difundir atualizações (replicar dados) para todos os outros nós inscritos. Isso permite uma propagação de dados assíncrona e desacoplada.
