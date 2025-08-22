@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package kvstore;
+
+option go_package = "./pkg/kvstore";
+
+// O principal serviço de armazenamento chave-valor
+service KvStore {
+  // Armazena um par chave-valor. Aciona a replicação para outros nós.
+  rpc Put (PutRequest) returns (PutResponse);
+  // Recupera todas as versões ativas para uma dada chave.
+  rpc Get (GetRequest) returns (GetResponse);
+}
+
+// --- Estruturas de Dados ---
+
+// Representa uma única entrada em um Vector Clock.
+message VectorClockEntry {
+  string node_id = 1;
+  uint64 counter = 2;
+}
+
+// Um Vector Clock, representado como uma lista de entradas.
+message VectorClock {
+  repeated VectorClockEntry entries = 1;
+}
+
+// Representa uma versão específica de um valor para uma chave.
+message Version {
+  string value = 1;
+  // O vector clock associado a esta versão. Opcional para flexibilidade.
+  VectorClock vector_clock = 2;
+  uint64 timestamp = 3; // Nanosegundos desde a época Unix.
+  string writer_node_id = 4; // O ID do nó que originalmente escreveu esta versão.
+}
+
+// --- Mensagens de Requisição ---
+
+// Requisição para a operação Put.
+message PutRequest {
+  string key = 1;
+  string value = 2;
+}
+
+// Requisição para a operação Get.
+message GetRequest {
+  string key = 1;
+}
+
+// --- Mensagens de Resposta ---
+
+// Resposta para a operação Put.
+message PutResponse {
+  bool success = 1;
+  string error_message = 2;
+}
+
+// Resposta para a operação Get.
+message GetResponse {
+  repeated Version versions = 1; // Todas as versões ativas encontradas para a chave.
+  string error_message = 2;
+}
