@@ -65,13 +65,13 @@ go build -o client-test/bin/client ./client-test
 Em um terminal, inicie o servidor:
 
 ```bash
-./server
+./server/bin/server
 ```
 
 Em outro terminal, rode o cliente:
 
 ```bash
-./client
+./client-test/bin/client
 ```
 
 Saída esperada:
