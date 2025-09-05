@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto_broker
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      # Monta o diretório de configuração local no container
+      - ./mosquitto/config:/mosquitto/config
+      # Monta o diretório de dados para persistência
+      - ./mosquitto/data:/mosquitto/data
+      # Monta o diretório de logs
+      - ./mosquitto/log:/mosquitto/log

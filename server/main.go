@@ -5,8 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	pb "github.com/Lucas-Sabbatini/TrabalhoFinalSD/pkg/kvstore"
+	nodestate "github.com/Lucas-Sabbatini/TrabalhoFinalSD/server/node_state"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 
 	"google.golang.org/grpc"
 )
@@ -15,7 +20,8 @@ import (
 type Server struct {
 	pb.UnimplementedKvStoreServer
 	// aqui você pode manter seu estado, ex: map[string]string ou NodeState
-	store map[string]string
+	store      map[string]string
+	mqttClient *nodestate.MQTTClient
 }
 
 // Implementação do método Put (gRPC)
@@ -54,21 +60,49 @@ func (s *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, 
 	}, nil
 }
 
+var messageHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
+	fmt.Printf("Mensagem recebida no tópico %s: %s\n", msg.Topic(), string(msg.Payload()))
+	// Aqui você pode adicionar a lógica para processar a mensagem recebida
+}
+
 func main() {
-	// cria listener TCP
+	nodeState := nodestate.NewNodeState()
+
+	mqttClient, err := nodestate.NewMQTTClient(nodeState.Node_id)
+	if err != nil {
+		log.Fatalf("Falha ao inicializar o cliente MQTT: %v", err)
+	}
+	defer mqttClient.Disconnect()
+	mqttClient.Subscribe(messageHandler)
+
+	// Configura e inicia o servidor gRPC
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("falha ao escutar: %v", err)
 	}
 
 	grpcServer := grpc.NewServer()
-	srv := &Server{store: make(map[string]string)}
 
-	// registra o serviço no gRPC
+	srv := &Server{
+		store:      make(map[string]string),
+		mqttClient: mqttClient,
+	}
 	pb.RegisterKvStoreServer(grpcServer, srv)
 
-	fmt.Println("Servidor gRPC ouvindo em :50051")
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("falha ao iniciar servidor: %v", err)
-	}
+	// Inicia o servidor gRPC em uma goroutine para não bloquear a main
+	go func() {
+		fmt.Println("Servidor gRPC ouvindo em :50051")
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("falha ao iniciar servidor gRPC: %v", err)
+		}
+	}()
+
+	fmt.Println("Servidor em execução. Pressione Ctrl+C para sair.")
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	fmt.Println("\nEncerrando servidor...")
+	grpcServer.GracefulStop()
+	fmt.Println("Servidor gRPC encerrado.")
 }
