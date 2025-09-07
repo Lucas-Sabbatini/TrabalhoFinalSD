@@ -46,21 +46,25 @@ Depois de rodar o `protoc`, temos dois arquivos principais:
 * Em resumo: **cola o gRPC ao Go**, permitindo implementar servidor e cliente.
 
 ## 3. Etapas para Compilar e Executar
+### Passo 1 - Criar o broker Mosquitto
+```bash
+docker-compose up -d
+```
 
-### Passo 1 — Baixar dependências
+### Passo 2 — Baixar dependências
 
 ```bash
 go mod tidy
 ```
 
-### Passo 2 — Compilar servidor e cliente
+### Passo 3 — Compilar servidor e cliente
 
 ```bash
 go build -o server/bin/server ./server
 go build -o client-test/bin/client ./client-test
 ```
 
-### Passo 3 — Executar
+### Passo 4 — Executar
 
 Em um terminal, inicie o servidor:
 
