@@ -46,49 +46,53 @@ Depois de rodar o `protoc`, temos dois arquivos principais:
 * Em resumo: **cola o gRPC ao Go**, permitindo implementar servidor e cliente.
 
 ## 3. Etapas para Compilar e Executar
+### Passo 1 - Criar o broker Mosquitto
+```bash
+docker-compose up -d
+```
 
-### Passo 1 — Baixar dependências
+### Passo 2 — Baixar dependências
 
 ```bash
 go mod tidy
 ```
 
-### Passo 2 — Compilar servidor e cliente
+### Passo 3 — Compilar servidor e cliente
 
 ```bash
 go build -o server/bin/server ./server
 go build -o client-test/bin/client ./client-test
 ```
 
-### Passo 3 — Executar
+### Passo 4 — Executar
 
 Em um terminal, inicie o servidor:
 
 ```bash
-./server
+# Iniciar na porta padrão (50051)
+./server/bin/server
+
+# Ou em uma porta específica
+./server/bin/server -porta 50052
 ```
 
-Em outro terminal, rode o cliente:
+#### Executando o Cliente
 
-```bash
-./client
-```
+O cliente de teste pode ser usado para enviar comandos put e get para o servidor. Abra um novo terminal para executar os comandos do cliente.
 
-Saída esperada:
+Comando put:
 
-* No servidor:
+Para inserir ou atualizar um par chave-valor, use o subcomando put. As flags -key e -value são obrigatórias.
+Bash
 
-  ```
-  [PUT] key=foo value=bar
-  ```
-* No cliente:
+./client-test/bin/client put -key="minha-chave" -value="meu-valor"
 
-  ```
-  Resposta Put: success:true
-  Resposta Get:
-    Valor=bar, Node=node_1
-  ```
+# Para se conectar a um servidor em um endereço diferente
+./client-test/bin/client put -addr="localhost:50052" -key="outra-chave" -value="outro-valor"
 
-# Aspectos Futuros para o trabalho
-- Implementar tudo, essa é apenas um esqueleto de uma estrutura cliente-servidor
-- Foco não será no cliente porém ele foi criado para fins de TESTE.
+Comando get:
+
+Para buscar os valores associados a uma chave, use o subcomando get. A flag -key é obrigatória.
+Bash
+
+./client-test/bin/client get -key="minha-chave"
