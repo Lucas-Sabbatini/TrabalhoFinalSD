@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package kvstore;
 
-option go_package = "./pkg/kvstore";
-
 // O principal serviço de armazenamento chave-valor
 service KvStore {
   // Armazena um par chave-valor. Aciona a replicação para outros nós.
@@ -34,15 +32,6 @@ message Version {
   string writer_node_id = 4; // O ID do nó que originalmente escreveu esta versão.
 }
 
-// Representa uma entrada completa de um par chave-valor com sua versão.
-// Usado para replicação.
-message StoreEntry {
-  string key = 1;
-  string value = 2;
-  // Opcionalmente, pode conter a versão completa se necessário.
-  Version version = 3; 
-}
-
 // --- Mensagens de Requisição ---
 
 // Requisição para a operação Put.
@@ -62,7 +51,6 @@ message GetRequest {
 message PutResponse {
   bool success = 1;
   string error_message = 2;
-  Version version = 3;
 }
 
 // Resposta para a operação Get.

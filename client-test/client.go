@@ -14,7 +14,6 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 
 	"google.golang.org/grpc"
-	// Usado para a conexão gRPC
 )
 
 var (
@@ -32,13 +31,14 @@ func subscribeToReplicationTopic(mqttClient mqtt.Client) {
 		fmt.Printf("Tópico: %s\n", msg.Topic())
 		fmt.Printf("Payload: %s\n", msg.Payload())
 
-		var entry pb.StoreEntry
+		// Como StoreEntry não existe no .proto, vamos usar um mapa para a desserialização
+		var entry map[string]interface{}
 		if err := json.Unmarshal(msg.Payload(), &entry); err != nil {
 			log.Printf("Erro ao desserializar a mensagem JSON: %v", err)
 			return
 		}
 
-		fmt.Printf("Dados desserializados: Chave=%s, Valor=%s, Versão=%+v\n", entry.Key, entry.Value, entry.Version)
+		fmt.Printf("Dados desserializados: Chave=%s, Valor=%s, Versão=%+v\n", entry["key"], entry["value"], entry["version"])
 		fmt.Println("-------------------------------------------")
 	}
 
@@ -92,13 +92,14 @@ func main() {
 
 	// Publica a alteração via MQTT se o PUT foi bem-sucedido
 	if putResp.Success {
-		storeEntry := &pb.StoreEntry{
-			Key:     key,
-			Value:   value,
-			Version: putResp.Version,
+		// Constrói o JSON manualmente, já que StoreEntry não existe mais
+		replicationPayload := map[string]interface{}{
+			"key":   key,
+			"value": value,
+			// A versão não pode ser enviada, pois o PutResponse não a retorna mais
 		}
 
-		payload, err := json.Marshal(storeEntry)
+		payload, err := json.Marshal(replicationPayload)
 		if err != nil {
 			log.Fatalf("Falha ao serializar para JSON: %v", err)
 		}
@@ -129,6 +130,6 @@ func main() {
 	fmt.Println("\nOperações completas. Aguardando mensagens de replicação... Pressione Ctrl+C para sair.")
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-	<-c // Bloqueia até receber o sinal
+	<-c
 	fmt.Println("Encerrando o cliente...")
 }
