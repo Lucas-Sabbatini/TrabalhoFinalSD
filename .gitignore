@@ -2,8 +2,6 @@
 # Ignora os executáveis gerados pelo 'go build'
 /server/bin/
 /client-test/bin/
-server
-client
 
 # Arquivos de log e dados de execução
 *.log

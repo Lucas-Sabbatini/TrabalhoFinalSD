@@ -13,8 +13,6 @@ const (
 )
 
 type MQTTClient struct {
-	topic  string
-	qos    byte
 	client mqtt.Client
 }
 
@@ -34,10 +32,10 @@ func NewMQTTClientWithBroker(nodeID string, brokerURL string) (*MQTTClient, erro
 
 // Publica uma mensagem em um tópico
 func (m *MQTTClient) Publish(payload string) {
-	token := m.client.Publish(m.topic, m.qos, false, payload)
+	token := m.client.Publish(ReplicationTopic, DefaultQoS, false, payload)
 	token.Wait()
 	if token.Error() != nil {
-		log.Printf("Erro ao publicar mensagem no tópico '%s': %v\n", m.topic, token.Error())
+		log.Printf("Erro ao publicar mensagem no tópico '%s': %v\n", ReplicationTopic, token.Error())
 	}
 }
 
