@@ -1,0 +1,25 @@
+# Binários compilados
+# Ignora os executáveis gerados pelo 'go build'
+/server/bin/
+/client-test/bin/
+server
+client
+
+# Arquivos de log e dados de execução
+*.log
+*.out
+/mosquitto/data/
+/mosquitto/log/
+
+# Arquivos de dependência do Go (caso use vendor)
+vendor/
+
+# Pastas de configuração de IDEs e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db

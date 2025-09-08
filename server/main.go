@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -51,14 +50,17 @@ func (s *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, 
 }
 
 func main() {
-	portPtr := flag.Int("porta", 50051, "Porta em que o servidor web irá ouvir as conexões")
-	flag.Parse()
-	addr := fmt.Sprintf(":%d", *portPtr)
+	cfg := src.ParseRuntimeFlags()
 
-	nodeState := src.NewNodeState()
+	fmt.Printf("Configuração carregada:\n")
+	fmt.Printf("  NodeID          = %s\n", cfg.NodeID)
+	fmt.Printf("  ListenAddr      = %s\n", cfg.ListenAddr)
+	fmt.Printf("  MQTT Broker URL = %s\n", cfg.MQTTBrokerURL())
+
+	nodeState := src.NewNodeStateWithID(cfg.NodeID) 
 	fmt.Printf("Nó iniciado com ID: %s\n", nodeState.Node_id)
 
-	mqttClient, err := src.NewMQTTClient(nodeState.Node_id)
+	mqttClient, err := src.NewMQTTClientWithBroker(cfg.NodeID, cfg.MQTTBrokerURL())
 	if err != nil {
 		log.Fatalf("Falha ao inicializar o cliente MQTT: %v", err)
 	}
@@ -93,7 +95,7 @@ func main() {
 
 	mqttClient.Subscribe(messageHandler)
 
-	lis, err := net.Listen("tcp", addr)
+	lis, err := net.Listen("tcp", cfg.ListenAddr)
 	if err != nil {
 		log.Fatalf("falha ao escutar: %v", err)
 	}
@@ -107,7 +109,7 @@ func main() {
 	pb.RegisterKvStoreServer(grpcServer, srv)
 
 	go func() {
-		fmt.Printf("Servidor gRPC ouvindo em %s", addr)
+		fmt.Printf("Servidor gRPC ouvindo em %s\n", cfg.ListenAddr)
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatalf("falha ao iniciar servidor gRPC: %v", err)
 		}

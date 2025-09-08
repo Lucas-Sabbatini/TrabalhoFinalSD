@@ -7,7 +7,6 @@ import (
 	"time"
 
 	pb "github.com/Lucas-Sabbatini/TrabalhoFinalSD/pkg/kvstore"
-	"github.com/google/uuid"
 )
 
 type StoreEntry struct {
@@ -20,12 +19,12 @@ type NodeState struct {
 	Store   map[string]StoreEntry
 }
 
-func NewNodeState() *NodeState {
-	return &NodeState{
-		Node_id: uuid.New().String(),
-		Store:   make(map[string]StoreEntry),
-	}
-
+func NewNodeStateWithID(id string) *NodeState {
+    ns := &NodeState{
+        Node_id: id,
+        Store:   make(map[string]StoreEntry),
+    }
+    return ns
 }
 
 // SerializeStoreEntry converte uma struct StoreEntry para uma representação JSON.
