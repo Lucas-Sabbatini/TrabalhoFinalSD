@@ -47,6 +47,10 @@ Depois de rodar o `protoc`, temos dois arquivos principais:
 
 ## 3. O que foi e o que não foi implementado
 
+Foram implementados todos os requisitos básicos do projeto. O foco era na resolução de conflitos e identificação de verões concorrentes. Isso foi implementado.
+
+Não foi implementado algoritimos complexos de consenso ou replicação. Cada nó escreve seu `StoreEntry` em um tópico. Dessa forma, seria possível implementar esses algoritmos neste caso.
+
 ## 4. Etapas para Compilar e Executar
 
 ### Passo 1 - Criar o broker Mosquitto
@@ -134,6 +138,12 @@ Bash
 ./client-test/bin/client get -key="minha-chave"
 
 ## 5. Principais dificuldades encontradas
+
+A principal dificuldade encontrada é de orquestrar a escrita de diferentes versões em um tópico e a propagação de todo o StoreEntry de um servidor no broker MQTT.
+
+Como comparar o `StoreEntry` recebido em um tópico com o `StoreEntry` local e como decidir quais versões irão acionar a função `process_put`.
+
+Uma nova versão recebida sobreescreve todas as versões antigas do Store para aquela key.
 
 ## 6. Detalhamento das estruturas de dados que armazenam as chaves/valores/versões
 
