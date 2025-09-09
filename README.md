@@ -125,17 +125,23 @@ Comando put:
 Para inserir ou atualizar um par chave-valor, use o subcomando put. As flags -key e -value são obrigatórias.
 Bash
 
+```bash
+
 ./client-test/bin/client put -key="minha-chave" -value="meu-valor"
+```
 
 # Para se conectar a um servidor em um endereço diferente
+```bash
 ./client-test/bin/client put -addr="localhost:50052" -key="outra-chave" -value="outro-valor"
+```
 
 Comando get:
 
 Para buscar os valores associados a uma chave, use o subcomando get. A flag -key é obrigatória.
 Bash
-
+```bash
 ./client-test/bin/client get -key="minha-chave"
+```
 
 ## 5. Principais dificuldades encontradas
 
