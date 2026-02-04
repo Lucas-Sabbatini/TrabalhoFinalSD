@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package kvstore;
 
-option go_package = "./pkg/kvstore";
-
 // O principal serviço de armazenamento chave-valor
 service KvStore {
   // Armazena um par chave-valor. Aciona a replicação para outros nós.
